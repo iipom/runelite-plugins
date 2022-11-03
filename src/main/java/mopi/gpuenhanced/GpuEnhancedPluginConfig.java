@@ -83,7 +83,7 @@ public interface GpuEnhancedPluginConfig extends Config
 	)
 	default AntiAliasingMode antiAliasingMode()
 	{
-		return AntiAliasingMode.DISABLED;
+		return AntiAliasingMode.MSAA_2;
 	}
 
 	@ConfigItem(

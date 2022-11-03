@@ -1436,14 +1436,11 @@ public class GpuEnhancedPlugin extends Plugin implements DrawCallbacks
 
 		// Copy the rendered frame into a texture
 		GL43C.glBindFramebuffer(GL43C.GL_READ_FRAMEBUFFER, defaultFb);
-		GL43C.glBindFramebuffer(GL43C.GL_DRAW_FRAMEBUFFER, fboSceneHandle);
+		GL43C.glBindFramebuffer(GL43C.GL_DRAW_FRAMEBUFFER, awtContext.getFramebuffer(false));
 
 		GL43C.glBlitFramebuffer(0, 0, stretchedCanvasWidth, stretchedCanvasHeight,
 			0, 0, stretchedCanvasWidth, stretchedCanvasHeight,
 			GL43C.GL_COLOR_BUFFER_BIT, GL43C.GL_NEAREST);
-
-		// Reset
-		GL43C.glBindFramebuffer(GL43C.GL_DRAW_FRAMEBUFFER, defaultFb);
 
 		// Run the crt shader on the rendered frame
 		GL43C.glBindTexture(GL43C.GL_TEXTURE_2D, interfaceTexture);
