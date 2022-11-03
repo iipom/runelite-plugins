@@ -22,64 +22,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package mopi.gpuenhanced;
+package mopi.crt;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.IntBuffer;
-
-class GpuIntBuffer
+class ShaderException extends Exception
 {
-	private IntBuffer buffer = allocateDirect(65536);
-
-	void put(int x, int y, int z)
+	ShaderException(String message)
 	{
-		buffer.put(x).put(y).put(z);
-	}
-
-	void put(int x, int y, int z, int c)
-	{
-		buffer.put(x).put(y).put(z).put(c);
-	}
-
-	void flip()
-	{
-		buffer.flip();
-	}
-
-	void clear()
-	{
-		buffer.clear();
-	}
-
-	void ensureCapacity(int size)
-	{
-		int capacity = buffer.capacity();
-		final int position = buffer.position();
-		if ((capacity - position) < size)
-		{
-			do
-			{
-				capacity *= 2;
-			}
-			while ((capacity - position) < size);
-
-			IntBuffer newB = allocateDirect(capacity);
-			buffer.flip();
-			newB.put(buffer);
-			buffer = newB;
-		}
-	}
-
-	IntBuffer getBuffer()
-	{
-		return buffer;
-	}
-
-	static IntBuffer allocateDirect(int size)
-	{
-		return ByteBuffer.allocateDirect(size * Integer.BYTES)
-			.order(ByteOrder.nativeOrder())
-			.asIntBuffer();
+		super(message);
 	}
 }

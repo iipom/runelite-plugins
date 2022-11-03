@@ -22,7 +22,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package mopi.gpuenhanced;
+package mopi.crt;
 
 import com.google.common.base.Stopwatch;
 import java.util.Arrays;
@@ -380,7 +380,7 @@ class SceneUploader
 
 	public int pushModel(Model model, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer)
 	{
-		final int triangleCount = Math.min(model.getFaceCount(), GpuEnhancedPlugin.MAX_TRIANGLE);
+		final int triangleCount = Math.min(model.getFaceCount(), CrtPlugin.MAX_TRIANGLE);
 
 		vertexBuffer.ensureCapacity(triangleCount * 12);
 		uvBuffer.ensureCapacity(triangleCount * 12);

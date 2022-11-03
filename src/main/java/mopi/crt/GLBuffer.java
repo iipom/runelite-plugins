@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Adam <Adam@sigterm.info>
+ * Copyright (c) 2021, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,12 +22,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package mopi.gpuenhanced;
+package mopi.crt;
 
-class ShaderException extends Exception
+import org.jocl.Pointer;
+import org.jocl.cl_mem;
+
+class GLBuffer
 {
-	ShaderException(String message)
+	int glBufferId = -1;
+	int size = -1;
+	cl_mem cl_mem;
+
+	Pointer ptr()
 	{
-		super(message);
+		return cl_mem != null ? Pointer.to(cl_mem) : null;
 	}
 }

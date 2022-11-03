@@ -22,19 +22,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package mopi.gpuenhanced;
+package mopi.crt;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
-class GpuFloatBuffer
+class GpuIntBuffer
 {
-	private FloatBuffer buffer = allocateDirect(65536);
+	private IntBuffer buffer = allocateDirect(65536);
 
-	void put(float texture, float u, float v, float pad)
+	void put(int x, int y, int z)
 	{
-		buffer.put(texture).put(u).put(v).put(pad);
+		buffer.put(x).put(y).put(z);
+	}
+
+	void put(int x, int y, int z, int c)
+	{
+		buffer.put(x).put(y).put(z).put(c);
 	}
 
 	void flip()
@@ -59,22 +64,22 @@ class GpuFloatBuffer
 			}
 			while ((capacity - position) < size);
 
-			FloatBuffer newB = allocateDirect(capacity);
+			IntBuffer newB = allocateDirect(capacity);
 			buffer.flip();
 			newB.put(buffer);
 			buffer = newB;
 		}
 	}
 
-	FloatBuffer getBuffer()
+	IntBuffer getBuffer()
 	{
 		return buffer;
 	}
 
-	static FloatBuffer allocateDirect(int size)
+	static IntBuffer allocateDirect(int size)
 	{
-		return ByteBuffer.allocateDirect(size * Float.BYTES)
+		return ByteBuffer.allocateDirect(size * Integer.BYTES)
 			.order(ByteOrder.nativeOrder())
-			.asFloatBuffer();
+			.asIntBuffer();
 	}
 }

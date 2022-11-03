@@ -22,7 +22,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package mopi.gpuenhanced;
+package mopi.crt;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Ints;
@@ -84,15 +84,15 @@ import org.lwjgl.system.Callback;
 import org.lwjgl.system.Configuration;
 
 @PluginDescriptor(
-	name = "GPU Enhanced",
-	description = "Utilizes the GPU better",
+	name = "CRT",
+	description = "GPU plugin with a CRT shader",
 	enabledByDefault = false,
 	tags = {"fog", "draw distance", "crt", "shader"},
 	conflicts = {"GPU"},
 	loadInSafeMode = false
 )
 @Slf4j
-public class GpuEnhancedPlugin extends Plugin implements DrawCallbacks
+public class CrtPlugin extends Plugin implements DrawCallbacks
 {
 	// This is the maximum number of triangles the compute shaders support
 	static final int MAX_TRIANGLE = 6144;
@@ -112,7 +112,7 @@ public class GpuEnhancedPlugin extends Plugin implements DrawCallbacks
 	private ClientThread clientThread;
 
 	@Inject
-	private GpuEnhancedPluginConfig config;
+	private CrtPluginConfig config;
 
 	@Inject
 	private TextureManager textureManager;
@@ -487,15 +487,15 @@ public class GpuEnhancedPlugin extends Plugin implements DrawCallbacks
 	}
 
 	@Provides
-	GpuEnhancedPluginConfig provideConfig(ConfigManager configManager)
+	CrtPluginConfig provideConfig(ConfigManager configManager)
 	{
-		return configManager.getConfig(GpuEnhancedPluginConfig.class);
+		return configManager.getConfig(CrtPluginConfig.class);
 	}
 
 	@Subscribe
 	public void onConfigChanged(ConfigChanged configChanged)
 	{
-		if (configChanged.getGroup().equals(GpuEnhancedPluginConfig.GROUP))
+		if (configChanged.getGroup().equals(CrtPluginConfig.GROUP))
 		{
 			if (configChanged.getKey().equals("unlockFps")
 				|| configChanged.getKey().equals("vsyncMode")
@@ -513,9 +513,9 @@ public class GpuEnhancedPlugin extends Plugin implements DrawCallbacks
 		client.setUnlockedFps(unlockFps);
 
 		// Without unlocked fps, the client manages sync on its 20ms timer
-		GpuEnhancedPluginConfig.SyncMode syncMode = unlockFps
+		CrtPluginConfig.SyncMode syncMode = unlockFps
 			? this.config.syncMode()
-			: GpuEnhancedPluginConfig.SyncMode.OFF;
+			: CrtPluginConfig.SyncMode.OFF;
 
 		int swapInterval = 0;
 		switch (syncMode)
@@ -558,7 +558,7 @@ public class GpuEnhancedPlugin extends Plugin implements DrawCallbacks
 			}
 			return null;
 		});
-		template.addInclude(GpuEnhancedPlugin.class);
+		template.addInclude(CrtPlugin.class);
 		return template;
 	}
 

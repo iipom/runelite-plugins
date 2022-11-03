@@ -22,7 +22,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package mopi.gpuenhanced;
+package mopi.crt;
 
 import com.google.common.base.Charsets;
 import java.nio.ByteBuffer;
@@ -58,8 +58,8 @@ class OpenCLManager
 	private static final String KERNEL_NAME_LARGE = "computeLarge";
 
 	private static final int MIN_WORK_GROUP_SIZE = 256;
-	private static final int SMALL_SIZE = GpuEnhancedPlugin.SMALL_TRIANGLE_COUNT;
-	private static final int LARGE_SIZE = GpuEnhancedPlugin.MAX_TRIANGLE;
+	private static final int SMALL_SIZE = CrtPlugin.SMALL_TRIANGLE_COUNT;
+	private static final int LARGE_SIZE = CrtPlugin.MAX_TRIANGLE;
 	//  struct shared_data {
 	//      int totalNum[12];
 	//      int totalDistance[12];

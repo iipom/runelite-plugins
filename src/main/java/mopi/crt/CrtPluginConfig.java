@@ -22,7 +22,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package mopi.gpuenhanced;
+package mopi.crt;
 
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
@@ -32,13 +32,13 @@ import net.runelite.client.config.Range;
 import net.runelite.client.plugins.gpu.config.AntiAliasingMode;
 import net.runelite.client.plugins.gpu.config.ColorBlindMode;
 import net.runelite.client.plugins.gpu.config.UIScalingMode;
-import static mopi.gpuenhanced.GpuEnhancedPlugin.MAX_DISTANCE;
-import static mopi.gpuenhanced.GpuEnhancedPlugin.MAX_FOG_DEPTH;
+import static mopi.crt.CrtPlugin.MAX_DISTANCE;
+import static mopi.crt.CrtPlugin.MAX_FOG_DEPTH;
 
-@ConfigGroup(GpuEnhancedPluginConfig.GROUP)
-public interface GpuEnhancedPluginConfig extends Config
+@ConfigGroup(CrtPluginConfig.GROUP)
+public interface CrtPluginConfig extends Config
 {
-	String GROUP = "gpuEnhanced";
+	String GROUP = "crt";
 
 	@ConfigSection(
 		name = "GPU",
