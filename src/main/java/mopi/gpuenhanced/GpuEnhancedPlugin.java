@@ -24,6 +24,7 @@
  */
 package mopi.gpuenhanced;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Ints;
 import com.google.inject.Provides;
 import java.awt.Canvas;
@@ -37,6 +38,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.HashMap;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
@@ -64,6 +67,7 @@ import net.runelite.client.plugins.PluginInstantiationException;
 import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.plugins.gpu.config.AntiAliasingMode;
 import net.runelite.client.plugins.gpu.config.UIScalingMode;
+import net.runelite.client.plugins.gpu.Mat4;
 import net.runelite.client.plugins.gpu.template.Template;
 import net.runelite.client.ui.DrawManager;
 import net.runelite.client.util.OSType;
@@ -78,7 +82,6 @@ import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.Callback;
 import org.lwjgl.system.Configuration;
-import net.runelite.client.plugins.gpu.Mat4;
 
 @PluginDescriptor(
 	name = "GPU Enhanced",
@@ -268,6 +271,9 @@ public class GpuEnhancedPlugin extends Plugin implements DrawCallbacks
 	private int uniTextureLightMode;
 	private int uniTick;
 
+	// CRT Uniforms
+	private HashMap<String, Integer> crtProgramUniforms;
+
 	private boolean lwjglInitted = false;
 
 	@Override
@@ -363,6 +369,9 @@ public class GpuEnhancedPlugin extends Plugin implements DrawCallbacks
 				modelBufferUnordered = new GpuIntBuffer();
 				modelBufferSmall = new GpuIntBuffer();
 				modelBuffer = new GpuIntBuffer();
+
+				glCrtProgram = -1;
+				crtProgramUniforms = new HashMap<>();
 
 				setupSyncMode();
 
@@ -558,6 +567,7 @@ public class GpuEnhancedPlugin extends Plugin implements DrawCallbacks
 		Template template = createTemplate(-1, -1);
 		glProgram = PROGRAM.compile(template);
 		glUiProgram = UI_PROGRAM.compile(template);
+		glCrtProgram = CRT_PROGRAM.compile(template);
 
 		if (computeMode == ComputeMode.OPENGL)
 		{
@@ -571,6 +581,7 @@ public class GpuEnhancedPlugin extends Plugin implements DrawCallbacks
 		}
 
 		initUniforms();
+		initCrtUniforms();
 	}
 
 	private void initUniforms()
@@ -601,6 +612,65 @@ public class GpuEnhancedPlugin extends Plugin implements DrawCallbacks
 			uniBlockLarge = GL43C.glGetUniformBlockIndex(glComputeProgram, "uniforms");
 			uniBlockMain = GL43C.glGetUniformBlockIndex(glProgram, "uniforms");
 		}
+	}
+
+	private void initCrtUniforms()
+	{
+		Set<String> uniformNames = ImmutableSet.of(
+			"FrameCount",
+			"OutputSize",
+			"TextureSize",
+			"InputSize",
+
+			"CRTgamma",
+			"monitorgamma",
+			"d",
+			"CURVATURE",
+			"R",
+			"cornersize",
+			"cornersmooth",
+			"x_tilt",
+			"y_tilt",
+			"overscan_x",
+			"overscan_y",
+			"DOTMASK",
+			"SHARPER",
+			"scanline_weight",
+			"lum",
+			"interlace_detect",
+			"SATURATION"
+		);
+		for (String name : uniformNames)
+		{
+			int uniform = GL43C.glGetUniformLocation(glCrtProgram, name);
+			crtProgramUniforms.put(name, uniform);
+		}
+	}
+
+	private void setCrtUniforms()
+	{
+		GL43C.glUniform1i(crtProgramUniforms.get("FrameCount"), client.getGameCycle());
+		GL43C.glUniform2f(crtProgramUniforms.get("OutputSize"), lastStretchedCanvasWidth, lastStretchedCanvasHeight);
+		GL43C.glUniform2f(crtProgramUniforms.get("TextureSize"), lastStretchedCanvasWidth, lastStretchedCanvasHeight);
+		GL43C.glUniform2f(crtProgramUniforms.get("InputSize"), lastStretchedCanvasWidth, lastStretchedCanvasHeight);
+
+		GL43C.glUniform1f(crtProgramUniforms.get("CRTgamma"), 2.4f);
+		GL43C.glUniform1f(crtProgramUniforms.get("monitorgamma"), 2.2f);
+		GL43C.glUniform1f(crtProgramUniforms.get("d"), 3.9f);
+		GL43C.glUniform1f(crtProgramUniforms.get("CURVATURE"), 1.0f);
+		GL43C.glUniform1f(crtProgramUniforms.get("R"), 2.0f);
+		GL43C.glUniform1f(crtProgramUniforms.get("cornersize"), 0.03f);
+		GL43C.glUniform1f(crtProgramUniforms.get("cornersmooth"), 80.0f);
+		GL43C.glUniform1f(crtProgramUniforms.get("x_tilt"), 0.0f);
+		GL43C.glUniform1f(crtProgramUniforms.get("y_tilt"), 0.0f);
+		GL43C.glUniform1f(crtProgramUniforms.get("overscan_x"), 100.0f);
+		GL43C.glUniform1f(crtProgramUniforms.get("overscan_y"), 100.0f);
+		GL43C.glUniform1f(crtProgramUniforms.get("DOTMASK"), 0.3f);
+		GL43C.glUniform1f(crtProgramUniforms.get("SHARPER"), 1.0f);
+		GL43C.glUniform1f(crtProgramUniforms.get("scanline_weight"), 0.3f);
+		GL43C.glUniform1f(crtProgramUniforms.get("lum"), 0.0f);
+		GL43C.glUniform1f(crtProgramUniforms.get("interlace_detect"), 0.0f);
+		GL43C.glUniform1f(crtProgramUniforms.get("SATURATION"), 1.0f);
 	}
 
 	private void shutdownProgram()
@@ -1252,6 +1322,7 @@ public class GpuEnhancedPlugin extends Plugin implements DrawCallbacks
 
 			GL43C.glDrawArrays(GL43C.GL_TRIANGLES, 0, targetBufferOffset);
 
+
 			GL43C.glDisable(GL43C.GL_BLEND);
 			GL43C.glDisable(GL43C.GL_CULL_FACE);
 
@@ -1335,6 +1406,8 @@ public class GpuEnhancedPlugin extends Plugin implements DrawCallbacks
 			GL43C.glTexParameteri(GL43C.GL_TEXTURE_2D, GL43C.GL_TEXTURE_MAG_FILTER, function);
 		}
 
+		renderCrt();
+
 		// Texture on UI
 		GL43C.glBindVertexArray(vaoUiHandle);
 		GL43C.glDrawArrays(GL43C.GL_TRIANGLE_FAN, 0, 4);
@@ -1347,6 +1420,36 @@ public class GpuEnhancedPlugin extends Plugin implements DrawCallbacks
 		GL43C.glDisable(GL43C.GL_BLEND);
 
 		vertexBuffer.clear();
+	}
+
+	private void renderCrt()
+	{
+		int defaultFb = awtContext.getFramebuffer(false);
+
+		final int canvasHeight = client.getCanvasHeight();
+		final int canvasWidth = client.getCanvasWidth();
+
+		final Dimension stretchedDimensions = client.getStretchedDimensions();
+
+		final int stretchedCanvasWidth = client.isStretchedEnabled() ? stretchedDimensions.width : canvasWidth;
+		final int stretchedCanvasHeight = client.isStretchedEnabled() ? stretchedDimensions.height : canvasHeight;
+
+		// Copy the rendered frame into a texture
+		GL43C.glBindFramebuffer(GL43C.GL_READ_FRAMEBUFFER, defaultFb);
+		GL43C.glBindFramebuffer(GL43C.GL_DRAW_FRAMEBUFFER, fboSceneHandle);
+
+		GL43C.glBlitFramebuffer(0, 0, stretchedCanvasWidth, stretchedCanvasHeight,
+			0, 0, stretchedCanvasWidth, stretchedCanvasHeight,
+			GL43C.GL_COLOR_BUFFER_BIT, GL43C.GL_NEAREST);
+
+		// Reset
+		GL43C.glBindFramebuffer(GL43C.GL_DRAW_FRAMEBUFFER, defaultFb);
+
+		// Run the crt shader on the rendered frame
+		GL43C.glBindTexture(GL43C.GL_TEXTURE_2D, interfaceTexture);
+		GL43C.glUseProgram(glCrtProgram);
+
+		setCrtUniforms();
 	}
 
 	/**
